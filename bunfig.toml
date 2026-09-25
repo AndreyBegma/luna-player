@@ -1,0 +1,8 @@
+# FEAT-20260925-718 — component and hook tests need a DOM before their first
+# import runs, the same reason glass-ui registers one here rather than per file:
+# React reads `document` while its own module evaluates, which is already too
+# late if the DOM is registered from inside a test file.
+#
+# See `src/test-setup.ts` for what is registered.
+[test]
+preload = ["./src/test-setup.ts"]

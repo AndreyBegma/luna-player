@@ -1,0 +1,60 @@
+{
+  "name": "luna-player",
+  "version": "0.0.0",
+  "description": "The video player lifted out of Luna Watch: HLS, controls, subtitles, keys, TV remotes.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndreyBegma/luna-player.git"
+  },
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src", "!src/**/*.test.*", "!src/**/*.spec.*", "!src/test-setup.ts"],
+  "sideEffects": ["*.css"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./player": "./src/player.tsx",
+    "./player.css": "./src/player.css",
+    "./types": "./src/types.ts",
+    "./labels": "./src/labels/index.ts",
+    "./storage": "./src/storage/player-storage.ts",
+    "./subtitle-appearance": "./src/hooks/use-subtitle-appearance.ts",
+    "./resume-policy": "./src/logic/resume-policy.ts",
+    "./end-of-stream": "./src/logic/end-of-stream.ts",
+    "./format-time": "./src/logic/format-time.ts",
+    "./media-query": "./src/platform/media-query.ts",
+    "./tv-spatial": "./src/platform/tv-spatial.ts",
+    "./playhead": "./src/hooks/playhead-store.ts"
+  },
+  "scripts": {
+    "lint": "biome lint src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "bun test src",
+    "build:check": "bun build ./src/index.ts --outdir /tmp/luna-player-check --target browser --external react --external react-dom --external hls.js --external 'glass-ui/*' --external lucide-react --external 'motion/*'"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "hls.js": "^1.5.0",
+    "glass-ui": "*",
+    "lucide-react": ">=0.400.0",
+    "motion": ">=12.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": { "hls.js": { "optional": true } },
+  "devDependencies": {
+    "glass-ui": "github:AndreyBegma/glass-ui#v0.20.6",
+    "hls.js": "1.7.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "lucide-react": "1.34.0",
+    "motion": "13.1.1",
+    "tailwindcss": "4.3.3",
+    "@biomejs/biome": "2.4.10",
+    "typescript": "^6.0.2",
+    "@types/react": "^19.1.0",
+    "@types/bun": "^1.4.0",
+    "@happy-dom/global-registrator": "^20.13.0"
+  }
+}
