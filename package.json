@@ -1,6 +1,6 @@
 {
   "name": "luna-player",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The video player lifted out of Luna Watch: HLS, controls, subtitles, keys, TV remotes.",
   "license": "MIT",
   "repository": {
@@ -59,7 +59,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "hls.js": "^1.5.0",
-    "glass-ui": "*",
+    "glass-ui": ">=0.1.0",
     "lucide-react": ">=0.400.0",
     "motion": ">=12.0.0",
     "tailwindcss": "^4.0.0"
