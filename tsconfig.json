@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2023",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "preserve",
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
