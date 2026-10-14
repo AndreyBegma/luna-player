@@ -1,5 +1,7 @@
 # luna-player
 
+[![Discord](https://img.shields.io/badge/Discord-join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/mkQARkBs4C)
+
 The video player core from [Luna Watch](https://github.com/AndreyBegma/luna-watch), lifted
 out so more than one application can mount it: HLS, controls, subtitles and
 tracks, keys and gestures, the sleep timer, night mode and dialogue boost,
