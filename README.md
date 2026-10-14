@@ -3,6 +3,7 @@
 **The video player core of Luna Watch, as a React package any app can mount.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Discord](https://img.shields.io/badge/Discord-join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/mkQARkBs4C)
 
 A good streaming player is mostly behaviour, not markup: when the controls
 hide, what a double tap on the left third does, how a TV remote's rewind key
