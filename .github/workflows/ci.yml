@@ -15,9 +15,18 @@ jobs:
         with:
           bun-version: latest
 
+      # The smoke test imports the packed tarball under Node and needs
+      # `module.registerHooks` (Node 22.15+); the release pipeline uses node:24.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - run: bun install
 
       - run: bun run lint
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build:check
+      - run: bun test scripts/release
+      - run: bun run build
+      - run: bun run smoke

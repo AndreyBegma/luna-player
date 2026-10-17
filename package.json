@@ -1,5 +1,5 @@
 {
-  "name": "luna-player",
+  "name": "@andrewbehma/luna-player",
   "version": "0.1.1",
   "description": "The video player lifted out of Luna Watch: HLS, controls, subtitles, keys, TV remotes.",
   "license": "MIT",
@@ -7,66 +7,168 @@
     "type": "git",
     "url": "git+https://github.com/AndreyBegma/luna-player.git"
   },
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": ["src", "!src/**/*.test.*", "!src/**/*.spec.*", "!src/test-setup.ts"],
-  "sideEffects": ["*.css"],
-  "exports": {
-    ".": "./src/index.ts",
-    "./player": "./src/player.tsx",
-    "./player.css": "./src/player.css",
-    "./types": "./src/types.ts",
-    "./labels": "./src/labels/index.ts",
-    "./storage": "./src/storage/player-storage.ts",
-    "./subtitle-appearance": "./src/logic/subtitle-appearance.ts",
-    "./resume-policy": "./src/logic/resume-policy.ts",
-    "./end-of-stream": "./src/logic/end-of-stream.ts",
-    "./format-time": "./src/logic/format-time.ts",
-    "./seek-geometry": "./src/logic/seek-geometry.ts",
-    "./frame-tap": "./src/logic/frame-tap.ts",
-    "./long-press": "./src/logic/long-press.ts",
-    "./hold-seek": "./src/logic/hold-seek.ts",
-    "./playback-rate": "./src/logic/playback-rate.ts",
-    "./controls-hide": "./src/logic/controls-hide.ts",
-    "./centre-transport-visibility": "./src/logic/centre-transport-visibility.ts",
-    "./video-fit": "./src/logic/video-fit.ts",
-    "./player-keys": "./src/logic/player-keys.ts",
-    "./volume-wheel": "./src/logic/volume-wheel.ts",
-    "./saved-volume": "./src/logic/saved-volume.ts",
-    "./episode-range": "./src/logic/episode-range.ts",
-    "./platform-types": "./src/logic/platform-types.ts",
-    "./audio-graph": "./src/logic/audio-graph.ts",
-    "./audio-track-labels": "./src/logic/audio-track-labels.ts",
-    "./sleep-timer": "./src/logic/sleep-timer.ts",
-    "./sleep-fade": "./src/logic/sleep-fade.ts",
-    "./still-watching": "./src/logic/still-watching.ts",
-    "./sound-mode": "./src/logic/sound-mode.ts",
-    "./clock-mode": "./src/logic/clock-mode.ts",
-    "./media-query": "./src/platform/media-query.ts",
-    "./tv-spatial": "./src/platform/tv-spatial.ts",
-    "./tv-focusables": "./src/platform/tv-focusables.ts",
-    "./audio-track-language": "./src/platform/audio-track-language.ts",
-    "./playhead": "./src/hooks/playhead-store.ts"
+  "publishConfig": {
+    "access": "public"
   },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./labels": {
+      "types": "./dist/labels/index.d.ts",
+      "import": "./dist/labels/index.js"
+    },
+    "./subtitle-appearance": {
+      "types": "./dist/logic/subtitle-appearance.d.ts",
+      "import": "./dist/logic/subtitle-appearance.js"
+    },
+    "./resume-policy": {
+      "types": "./dist/logic/resume-policy.d.ts",
+      "import": "./dist/logic/resume-policy.js"
+    },
+    "./end-of-stream": {
+      "types": "./dist/logic/end-of-stream.d.ts",
+      "import": "./dist/logic/end-of-stream.js"
+    },
+    "./format-time": {
+      "types": "./dist/logic/format-time.d.ts",
+      "import": "./dist/logic/format-time.js"
+    },
+    "./seek-geometry": {
+      "types": "./dist/logic/seek-geometry.d.ts",
+      "import": "./dist/logic/seek-geometry.js"
+    },
+    "./frame-tap": {
+      "types": "./dist/logic/frame-tap.d.ts",
+      "import": "./dist/logic/frame-tap.js"
+    },
+    "./long-press": {
+      "types": "./dist/logic/long-press.d.ts",
+      "import": "./dist/logic/long-press.js"
+    },
+    "./hold-seek": {
+      "types": "./dist/logic/hold-seek.d.ts",
+      "import": "./dist/logic/hold-seek.js"
+    },
+    "./playback-rate": {
+      "types": "./dist/logic/playback-rate.d.ts",
+      "import": "./dist/logic/playback-rate.js"
+    },
+    "./controls-hide": {
+      "types": "./dist/logic/controls-hide.d.ts",
+      "import": "./dist/logic/controls-hide.js"
+    },
+    "./centre-transport-visibility": {
+      "types": "./dist/logic/centre-transport-visibility.d.ts",
+      "import": "./dist/logic/centre-transport-visibility.js"
+    },
+    "./video-fit": {
+      "types": "./dist/logic/video-fit.d.ts",
+      "import": "./dist/logic/video-fit.js"
+    },
+    "./player-keys": {
+      "types": "./dist/logic/player-keys.d.ts",
+      "import": "./dist/logic/player-keys.js"
+    },
+    "./volume-wheel": {
+      "types": "./dist/logic/volume-wheel.d.ts",
+      "import": "./dist/logic/volume-wheel.js"
+    },
+    "./saved-volume": {
+      "types": "./dist/logic/saved-volume.d.ts",
+      "import": "./dist/logic/saved-volume.js"
+    },
+    "./episode-range": {
+      "types": "./dist/logic/episode-range.d.ts",
+      "import": "./dist/logic/episode-range.js"
+    },
+    "./platform-types": {
+      "types": "./dist/logic/platform-types.d.ts",
+      "import": "./dist/logic/platform-types.js"
+    },
+    "./audio-graph": {
+      "types": "./dist/logic/audio-graph.d.ts",
+      "import": "./dist/logic/audio-graph.js"
+    },
+    "./audio-track-labels": {
+      "types": "./dist/logic/audio-track-labels.d.ts",
+      "import": "./dist/logic/audio-track-labels.js"
+    },
+    "./sleep-timer": {
+      "types": "./dist/logic/sleep-timer.d.ts",
+      "import": "./dist/logic/sleep-timer.js"
+    },
+    "./sleep-fade": {
+      "types": "./dist/logic/sleep-fade.d.ts",
+      "import": "./dist/logic/sleep-fade.js"
+    },
+    "./still-watching": {
+      "types": "./dist/logic/still-watching.d.ts",
+      "import": "./dist/logic/still-watching.js"
+    },
+    "./sound-mode": {
+      "types": "./dist/logic/sound-mode.d.ts",
+      "import": "./dist/logic/sound-mode.js"
+    },
+    "./clock-mode": {
+      "types": "./dist/logic/clock-mode.d.ts",
+      "import": "./dist/logic/clock-mode.js"
+    },
+    "./media-query": {
+      "types": "./dist/platform/media-query.d.ts",
+      "import": "./dist/platform/media-query.js"
+    },
+    "./tv-spatial": {
+      "types": "./dist/platform/tv-spatial.d.ts",
+      "import": "./dist/platform/tv-spatial.js"
+    },
+    "./tv-focusables": {
+      "types": "./dist/platform/tv-focusables.d.ts",
+      "import": "./dist/platform/tv-focusables.js"
+    },
+    "./audio-track-language": {
+      "types": "./dist/platform/audio-track-language.d.ts",
+      "import": "./dist/platform/audio-track-language.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
-    "lint": "biome lint src",
+    "lint": "biome lint src scripts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun test src",
-    "build:check": "bun build ./src/index.ts --outdir /tmp/luna-player-check --target browser --external react --external react-dom --external hls.js --external 'glass-ui/*' --external lucide-react --external 'motion/*'"
+    "build": "bun scripts/build.ts",
+    "build:check": "bun build ./src/index.ts --outdir /tmp/luna-player-check --target browser --external react --external react-dom --external hls.js --external '@andrewbehma/glass-ui/*' --external lucide-react --external 'motion/*'",
+    "smoke": "node scripts/smoke.mjs",
+    "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "hls.js": "^1.5.0",
-    "glass-ui": ">=0.1.0",
+    "@andrewbehma/glass-ui": ">=0.20.0",
     "lucide-react": ">=0.400.0",
     "motion": ">=12.0.0",
     "tailwindcss": "^4.0.0"
   },
-  "peerDependenciesMeta": { "hls.js": { "optional": true } },
+  "peerDependenciesMeta": {
+    "hls.js": {
+      "optional": true
+    }
+  },
   "devDependencies": {
-    "glass-ui": "github:AndreyBegma/glass-ui#v0.20.6",
+    "@andrewbehma/glass-ui": "0.34.0",
     "hls.js": "1.7.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",

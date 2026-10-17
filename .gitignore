@@ -1,4 +1,8 @@
 node_modules/
+dist/
+.smoke/
+.release/
+*.tgz
 .turbo/
 *.tsbuildinfo
 .DS_Store
