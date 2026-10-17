@@ -1,5 +1,5 @@
 /**
- * Imports each `@andrewbehma/luna-player` subpath named on the command line and
+ * Imports each `luna-player` subpath named on the command line and
  * exits non-zero if any of them fails. Subpaths before `--` must export
  * something; the ones after it are types-only modules (their built file is a
  * bare `export {};`) and only have to resolve and import. `smoke.mjs` copies this file into
@@ -23,7 +23,7 @@ registerHooks({
   },
 });
 
-const NAME = '@andrewbehma/luna-player';
+const NAME = 'luna-player';
 const tarball = fileURLToPath(new URL('./node_modules/', import.meta.url));
 
 let failed = 0;

@@ -1,5 +1,5 @@
 {
-  "name": "@andrewbehma/luna-player",
+  "name": "luna-player",
   "version": "0.1.1",
   "description": "The video player lifted out of Luna Watch: HLS, controls, subtitles, keys, TV remotes.",
   "license": "MIT",

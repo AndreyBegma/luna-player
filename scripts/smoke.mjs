@@ -3,7 +3,7 @@
  * `bun run smoke`, locally and in CI.
  *
  * 1. `npm pack`, and unpack the tarball as
- *    `.smoke/node_modules/@andrewbehma/luna-player` — so it is the package a
+ *    `.smoke/node_modules/luna-player` — so it is the package a
  *    consumer gets, not the working tree, and its peers still resolve from the
  *    repository's own `node_modules` by walking up.
  * 2. The tarball holds only `package.json`, `README.md`, `LICENSE` and
@@ -68,13 +68,13 @@ const [{ filename }] = JSON.parse(
     encoding: 'utf8',
   }),
 );
-const scope = join(SMOKE, 'node_modules', '@andrewbehma');
-mkdirSync(scope, { recursive: true });
-execFileSync('tar', ['-xzf', join(SMOKE, filename), '-C', scope]);
-const PKG = join(scope, 'luna-player');
-renameSync(join(scope, 'package'), PKG);
+const modules = join(SMOKE, 'node_modules');
+mkdirSync(modules, { recursive: true });
+execFileSync('tar', ['-xzf', join(SMOKE, filename), '-C', modules]);
+const PKG = join(modules, 'luna-player');
+renameSync(join(modules, 'package'), PKG);
 // Without a package.json of its own, `.smoke/` would sit in the repository's
-// package scope, and `@andrewbehma/luna-player` would self-reference the working
+// package scope, and `luna-player` would self-reference the working
 // tree's `dist/` instead of resolving to the unpacked tarball.
 writeFileSync(
   join(SMOKE, 'package.json'),

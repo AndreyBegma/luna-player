@@ -1,4 +1,4 @@
-# Publishes @andrewbehma/luna-player to npm.
+# Publishes luna-player to npm.
 #
 # A push to main (the merge of a release/vX.Y.Z pull request) publishes the
 # version in package.json when it is not on npm yet, then pushes the tag

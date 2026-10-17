@@ -59,7 +59,7 @@ phone remote and recommendations stay in the host app.
 - **Audio track language** — resolve a track's language and pick the
   default track from the account locale (`audio-track-language`).
 
-**Labels** (`@andrewbehma/luna-player/labels`)
+**Labels** (`luna-player/labels`)
 
 - `LabelsProvider` and `useLabels()` — every string the player renders comes
   from a plain `PlayerLabels` object supplied by the host, so the package
@@ -69,7 +69,7 @@ phone remote and recommendations stay in the host app.
 ## Install
 
 ```sh
-bun add @andrewbehma/luna-player
+bun add luna-player
 bun add react react-dom @andrewbehma/glass-ui lucide-react motion tailwindcss
 bun add hls.js   # optional peer
 ```
@@ -87,9 +87,9 @@ Import from a subpath. The root barrel is intentionally empty, so an app
 only pulls in what it uses.
 
 ```ts
-import { formatTime, formatRemaining } from '@andrewbehma/luna-player/format-time';
-import { bindingFor } from '@andrewbehma/luna-player/player-keys';
-import { createSleepTimer } from '@andrewbehma/luna-player/sleep-timer';
+import { formatTime, formatRemaining } from 'luna-player/format-time';
+import { bindingFor } from 'luna-player/player-keys';
+import { createSleepTimer } from 'luna-player/sleep-timer';
 
 formatTime(3725); // "1:02:05"
 formatRemaining(60, 3725); // "−1:01:05"
@@ -106,7 +106,7 @@ sleep.set(30); // minutes from now; 'endOfEpisode' or null also work
 Labels:
 
 ```tsx
-import { LabelsProvider, type PlayerLabels } from '@andrewbehma/luna-player/labels';
+import { LabelsProvider, type PlayerLabels } from 'luna-player/labels';
 
 const labels: PlayerLabels = {
   ariaPlay: 'Play',
@@ -164,7 +164,7 @@ on every pull request and on pushes to `develop` and `main`.
 ## Releasing
 
 The version in `package.json` is the release. Merging a version bump into
-`main` publishes it to npm as `@andrewbehma/luna-player` and tags it; there is
+`main` publishes it to npm as `luna-player` and tags it; there is
 no manual step.
 
 1. Branch `release/vX.Y.Z` from `develop`, set `"version": "X.Y.Z"` in
@@ -192,12 +192,12 @@ again and gets a 409; `scripts/release/publish.sh` treats that as published.
 `npm publish --tag v<major>.<minor>` (`v0.1` for 0.1.9), so it cannot move the
 `latest` dist-tag. `scripts/release/decide.sh` makes that decision and
 `scripts/release/decide.test.ts` covers it. After a release, check with
-`npm view @andrewbehma/luna-player dist-tags`.
+`npm view luna-player dist-tags`.
 
 **Woodpecker setup.** The `AndreyBegma/luna-player` repository must be
 activated in Woodpecker, and two secrets must exist on it:
 
-- `npm_token` — an npm token that can publish `@andrewbehma/luna-player`,
+- `npm_token` — an npm token that can publish `luna-player`,
   available to the `push`, `tag` and `manual` events. Without `push` the
   publish step says so and passes.
 - `github_token` — a token with contents write on this repository, available

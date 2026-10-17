@@ -36,14 +36,14 @@ function publish(output: string, code: number, tag = 'latest') {
 
 describe('release publish.sh', () => {
   test('a publish that succeeds passes, with the dist-tag it was given', () => {
-    const run = publish('+ @andrewbehma/luna-player@0.1.2', 0, 'v0.8');
+    const run = publish('+ luna-player@0.1.2', 0, 'v0.8');
     expect(run.status).toBe(0);
     expect(run.args).toBe('publish --ignore-scripts --tag v0.8');
   });
 
   test('a 409 over a staged version passes: the registry holds it', () => {
     const run = publish(
-      'npm error code E409\nnpm error 409 Conflict - PUT https://registry.npmjs.org/@andrewbehma%2fluna-player - Cannot publish over previously staged version "0.1.2".',
+      'npm error code E409\nnpm error 409 Conflict - PUT https://registry.npmjs.org/luna-player - Cannot publish over previously staged version "0.1.2".',
       1,
     );
     expect(run.status).toBe(0);
