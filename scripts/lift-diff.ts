@@ -87,15 +87,21 @@ const ALIASES: Record<string, string> = {
 
 const SPECIFIER = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])([^'"]+)\2/g;
 
+/**
+ * The module a specifier names, from the core folder's point of view:
+ * `./tracks/types` stays `tracks/types` (it is not `./types`), while
+ * `luna-player/saved-volume` and `../logic/saved-volume` both become
+ * `saved-volume`.
+ */
 function normaliseSpecifier(specifier: string): string {
   if (ALIASES[specifier]) return ALIASES[specifier];
   if (specifier.startsWith('glass-ui/')) return `@andrewbehma/${specifier}`;
-  if (
-    specifier.startsWith('.') ||
-    specifier.startsWith('luna-player/') ||
-    specifier.startsWith('@/components/player/core/')
-  ) {
-    return basename(specifier);
+  if (specifier.startsWith('luna-player/')) return basename(specifier);
+  if (specifier.startsWith('@/components/player/core/')) {
+    return specifier.slice('@/components/player/core/'.length);
+  }
+  if (specifier.startsWith('.')) {
+    return specifier.replace(/^(?:\.\.?\/)+/, '').replace(/^(?:logic|platform)\//, '');
   }
   return specifier;
 }
