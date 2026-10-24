@@ -11,12 +11,19 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
  * those slipping back in would build here (nothing resolves `@/`) only to
  * fail in a consumer. So every specifier under `src/player/` is either
  * relative and stays inside `src/`, or names a peer in `package.json` (or a
- * subpath of one). Tests may also import `bun:test` and `node:` builtins.
+ * subpath of one). Tests may also import `bun:test`, `bun` (its types, for
+ * `bundle.test.ts`) and `node:` builtins.
  *
  * hls.js is a peer, but an optional one, and the player reaches it only
  * through an injected `HlsLoader`: its name may not appear here at all
  * outside comments, so no emitted module or declaration can depend on it.
+ *
+ * FEAT-20260925-718 L3 — with one exception: `hls.ts`, the
+ * `luna-player/hls` entry, is the default loader and the only module that
+ * names it. Nothing under `luna-player/player` imports it
+ * (`bundle.test.ts` builds that graph and finds no hls.js in it).
  */
+const HLS_ENTRY = join(new URL('.', import.meta.url).pathname, 'hls.ts');
 
 const PLAYER = new URL('.', import.meta.url).pathname;
 const SRC = resolve(PLAYER, '..');
@@ -71,6 +78,27 @@ describe('the player fence', () => {
     expect(files.length).toBeGreaterThan(0);
   });
 
+  test('the player itself and its components are inside the fence', () => {
+    const names = files.map((file) => file.name);
+    for (const name of [
+      'player/player.tsx',
+      'player/player-layers.tsx',
+      'player/control-bar.tsx',
+      'player/video-element.tsx',
+      'player/index.ts',
+      'player/hls.ts',
+    ]) {
+      expect(names).toContain(name);
+    }
+  });
+
+  test('nothing in the player imports the hls entry', () => {
+    const importers = files
+      .filter((file) => file.specifiers.some((s) => /(?:^|\/)hls(?:\.ts)?$/.test(s)))
+      .map((file) => file.name);
+    expect(importers).toEqual([]);
+  });
+
   test('every import is relative inside src/, a declared peer, or bun:test in a test', () => {
     const offenders = files.flatMap((file) =>
       file.specifiers
@@ -79,8 +107,12 @@ describe('the player fence', () => {
             const target = resolve(dirname(file.path), specifier);
             return relative(SRC, target).startsWith('..');
           }
-          if (file.isTest && (specifier === 'bun:test' || specifier.startsWith('node:')))
+          if (
+            file.isTest &&
+            (specifier === 'bun' || specifier === 'bun:test' || specifier.startsWith('node:'))
+          )
             return false;
+          if (file.path === HLS_ENTRY && specifier === 'hls.js') return false;
           return !isPeer(specifier);
         })
         .map((specifier) => `${file.name}: ${specifier}`),
@@ -106,6 +138,7 @@ describe('the player fence', () => {
     const literal = /(['"`])hls\.js(?:\/[^'"`]*)?\1/;
     const offenders = files
       .filter((file) => !file.path.endsWith('fence.spec.ts'))
+      .filter((file) => file.path !== HLS_ENTRY)
       .filter((file) => literal.test(file.body))
       .map((file) => file.name);
     expect(offenders).toEqual([]);
