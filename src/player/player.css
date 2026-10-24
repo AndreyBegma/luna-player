@@ -81,10 +81,15 @@ video[data-cue-background="none"]::cue {
 }
 
 /* The box the rule above refuses by default, for the viewer who wants it:
-   the ground, a quarter see-through, behind the words only. */
+   the ground, a quarter see-through, behind the words only.
+
+   FEAT-20260925-718 L3 — opaque ground here, where luna-watch mixes it 75 %
+   with `color-mix()`: that is Chromium 111, and `src/targets.spec.ts` holds
+   the package to Chromium 94. Restore the mix when Glass UI ships a
+   translucent ground token or the television moves past Chromium 111. */
 video[data-cue-background="box"]::cue {
   text-shadow: none;
-  background: color-mix(in srgb, var(--color-ground) 75%, transparent);
+  background: var(--color-ground);
 }
 
 /* FEAT-20260830-489 — how a notice inside the player arrives.
@@ -97,16 +102,14 @@ video[data-cue-background="box"]::cue {
  *
  * Progressive by nature — an engine that does not know the rule simply shows
  * the notice, which is the behaviour being replaced.
+ *
+ * FEAT-20260925-718 L3 — the entrance itself is not in the package:
+ * `@starting-style` is Chromium 117, and `src/targets.spec.ts` holds the
+ * package to Chromium 94. The notice arrives as a cut, which is what every
+ * engine without the rule did anyway; the transition stays for the exit.
  */
 .player-notice {
   transition:
     opacity var(--dur-base) ease-out,
     transform var(--dur-base) var(--ease-sheet);
-}
-
-@starting-style {
-  .player-notice {
-    opacity: 0;
-    transform: translateY(8px);
-  }
 }
