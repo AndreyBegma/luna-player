@@ -18,6 +18,7 @@
     "src/test-setup.ts",
     "src/test-dom-shim.ts",
     "src/test-stub-global.ts",
-    "src/player/dropping-video.ts"
+    "src/player/dropping-video.ts",
+    "src/player/labels/test-labels.ts"
   ]
 }

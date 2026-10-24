@@ -1,0 +1,18 @@
+/* BUG-20260924-687 — subtitle position "Raised", for the browser's own cues.
+ *
+ * `use-bar-clearance.ts` measures how far the top of the control bar sits
+ * above the bottom of the picture and writes it on the player as
+ * `--player-bar-clearance`. The cue container is the box the browser lays
+ * every cue out in; lifting it by that much keeps each cue on its own `auto`
+ * line, one or three lines tall, at any size, with its bottom above the bar.
+ * Measured in Chromium, the variable inherits into the container and both a
+ * one-line and a two-line cue move up by exactly the lift.
+ *
+ * `video-element.tsx` writes `raised` here only where the engine supports
+ * this box (`cuePlacement`); anywhere else the cues' own lines are moved
+ * instead, and never both. A transform, not a change of size, so the
+ * browser's own layout of the cues is left alone.
+ */
+video[data-cue-position="raised"]::-webkit-media-text-track-container {
+  transform: translateY(calc(-1 * var(--player-bar-clearance, 0px)));
+}

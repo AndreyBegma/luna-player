@@ -1,0 +1,115 @@
+/**
+ * FEAT-20260925-718 S6 — the player's own CSS, gathered under
+ * `components/player/core/` instead of scattered across `app/`.
+ *
+ * `::cue` moves from `app/globals.css` and `.player-notice` from
+ * `app/tv.css` — both are player rules, not app chrome, and belonged there
+ * only because `core/**` did not exist yet when they were written.
+ * `player-motion.css` and `player-cues.css` already lived here; they are
+ * pulled in below so this one file is the player's whole stylesheet, the
+ * shape `luna-player/player.css` ships as after L3 (§7.1, §9.1). The
+ * components that import `player-motion.css` and `player-cues.css` directly
+ * keep doing so — this is not their only path in, so nothing here removes
+ * them.
+ *
+ * `app/globals.css` imports this file; no computed style changes.
+ */
+
+@import "./player-motion.css";
+@import "./player-cues.css";
+
+/**
+ * Tailwind 4 has no content globs — it scans from the build's working
+ * directory and excludes `node_modules` unconditionally. `core/**` sits
+ * inside the app's own source tree today, so this changes nothing yet, but
+ * L3 moves this file into `luna-player`, installed into `node_modules` like
+ * `glass-ui`, and the same gap `glass-ui/src/tokens.css` documents opens
+ * under it the day it moves. Declaring the scan surface now means the lift
+ * is the pure move §6.1 promises — no CSS decision left for L3 to make.
+ */
+@source ".";
+
+/* FEAT-20260823-371 — subtitle cues.
+ *
+ * The browser's default is white text with a hard black box behind every line,
+ * which on a television reads as a caption burnt onto the picture rather than
+ * as part of the player. These use the same two tokens the rest of the
+ * interface does — the ink for the text, the ground for what sits behind it —
+ * so a cue belongs to Luna and not to the browser.
+ *
+ * A shadow rather than a filled box: over a bright frame the text still needs
+ * separating from the picture, and a box wide enough to guarantee that covers
+ * more of the film than the words do. Four offsets is the cheap way to outline
+ * a glyph without a paint-order property Safari does not implement.
+ *
+ * Not sized in `px`. WebKit scales cue text with the video box, and a fixed
+ * size that reads correctly in a window is unreadable across a room.
+ */
+::cue {
+  color: var(--color-ink);
+  background: transparent;
+  font-family: var(--font-sans, system-ui), sans-serif;
+  font-weight: 500;
+  text-shadow:
+    0 1px 2px var(--color-ground),
+    0 -1px 2px var(--color-ground),
+    1px 0 2px var(--color-ground),
+    -1px 0 2px var(--color-ground);
+}
+
+/* FEAT-20260923-647 — the viewer's own size and background, per device.
+ *
+ * `video-element.tsx` writes them as attributes on the video, the only handle
+ * a stylesheet has on a cue. Sizes are percentages of the browser's own cue
+ * size, which already follows the video box, so `m` is the rule above
+ * unchanged. The numbers are `SUBTITLE_SCALE` in
+ * `lib/player/subtitle-appearance.ts`, which the learning cue layer reads. */
+video[data-cue-size="s"]::cue {
+  font-size: 80%;
+}
+
+video[data-cue-size="l"]::cue {
+  font-size: 125%;
+}
+
+video[data-cue-size="xl"]::cue {
+  font-size: 150%;
+}
+
+video[data-cue-background="none"]::cue {
+  text-shadow: none;
+}
+
+/* The box the rule above refuses by default, for the viewer who wants it:
+   the ground, a quarter see-through, behind the words only.
+
+   FEAT-20260925-718 L3 — opaque ground here, where luna-watch mixes it 75 %
+   with `color-mix()`: that is Chromium 111, and `src/targets.spec.ts` holds
+   the package to Chromium 94. Restore the mix when Glass UI ships a
+   translucent ground token or the television moves past Chromium 111. */
+video[data-cue-background="box"]::cue {
+  text-shadow: none;
+  background: var(--color-ground);
+}
+
+/* FEAT-20260830-489 — how a notice inside the player arrives.
+ *
+ * The resume banner, the next-episode countdown and the playback error notice
+ * are all mounted into an already-painted player, and all three used to appear
+ * as a hard cut. `@starting-style` is what lets an element that has just been
+ * added to the DOM transition from somewhere: without it there is no previous
+ * computed style to interpolate from and the transition is skipped entirely.
+ *
+ * Progressive by nature — an engine that does not know the rule simply shows
+ * the notice, which is the behaviour being replaced.
+ *
+ * FEAT-20260925-718 L3 — the entrance itself is not in the package:
+ * `@starting-style` is Chromium 117, and `src/targets.spec.ts` holds the
+ * package to Chromium 94. The notice arrives as a cut, which is what every
+ * engine without the rule did anyway; the transition stays for the exit.
+ */
+.player-notice {
+  transition:
+    opacity var(--dur-base) ease-out,
+    transform var(--dur-base) var(--ease-sheet);
+}

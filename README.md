@@ -17,12 +17,13 @@ desktops and televisions (Samsung Tizen, Android TV) and want Luna's player
 behaviour without Luna's product features. Progress sync, watch party, the
 phone remote and recommendations stay in the host app.
 
-> **Status: work in progress.** Today the package ships the player's logic,
-> the platform helpers and the labels seam — pure functions and small hooks,
-> each importable on its own. The `<Player>` component, its stylesheet, the
-> storage adapter and the playhead store are **not in the package yet**; their
-> subpaths (`/player`, `/player.css`, `/types`, `/storage`, `/playhead`) are
-> added to `exports` when they land.
+> **Status: work in progress.** The package ships a first `<Player>`
+> (`luna-player/player`, its stylesheet `luna-player/player.css`, and the
+> hls.js loader `luna-player/hls`), the player's logic, the platform helpers
+> and the labels seam. The `/types`, `/storage` and `/playhead` subpaths are
+> **not in the package yet**; the Player's own types and the
+> `localStoragePlayerStorage` adapter are exported from `luna-player/player`
+> until then.
 
 ## What is in the package today
 
@@ -65,6 +66,11 @@ phone remote and recommendations stay in the host app.
   from a plain `PlayerLabels` object supplied by the host, so the package
   does not depend on an i18n library. Strings that take a parameter are
   functions, so a caller cannot forget the parameter.
+- `en` — the built-in English, Luna Watch's own strings.
+
+**Player** (`luna-player/player`, `luna-player/player.css`, `luna-player/hls`)
+
+- `<Player>` — the first slice of Luna Watch's player. See [Player](#player).
 
 ## Install
 
@@ -117,6 +123,145 @@ const labels: PlayerLabels = {
 
 <LabelsProvider labels={labels}>{children}</LabelsProvider>;
 ```
+
+## Player
+
+`<Player>` is **extracted from Luna Watch**, not written fresh: the core of
+its `VideoPlayer`, with the same markup, Tailwind classes, gestures and keys,
+and the app's own features left out. This first slice plays a progressive
+MP4 or WebM (or HLS, see below) with play/pause, the seek bar, the clock,
+volume, speed and fullscreen.
+
+### Install
+
+```sh
+bun add luna-player
+bun add react react-dom @andrewbehma/glass-ui lucide-react motion tailwindcss
+bun add @radix-ui/react-slider @radix-ui/react-tooltip   # Glass UI's, needed by the player
+bun add hls.js   # optional, only for hlsSrc
+```
+
+The player uses Glass UI's `slider`, `tooltip`, `badge`, `button` and `card`.
+The two Radix packages are Glass UI's peers, and the player needs them
+installed.
+
+### Styles
+
+The components are styled with Tailwind utility classes and Glass UI tokens.
+Import the player's stylesheet **from your Tailwind entry CSS**, after Glass
+UI's imports:
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+@import "@andrewbehma/glass-ui/tokens.css";
+@import "@andrewbehma/glass-ui/material.css";
+@import "@andrewbehma/glass-ui/base.css";
+@import "luna-player/player.css";
+```
+
+`player.css` carries `@source "."`, which points your Tailwind build at the
+player's compiled components in `node_modules/luna-player/dist/player/`, so
+the classes they use are generated. A JavaScript `import 'luna-player/player.css'`
+skips your Tailwind build and is **not supported**: the classes would be
+missing. `bun run smoke` checks this against the packed tarball.
+
+### Example
+
+```tsx
+'use client';
+import { Player } from 'luna-player/player';
+
+<Player
+  src="/videos/demo.mp4"
+  poster="/videos/demo.jpg"
+  aspectRatio="9:16"
+  onError={() => showFallback()}
+/>;
+```
+
+It renders on the server (Next.js App Router included). Every module is
+`'use client'`, and nothing reads `window`, `document` or storage at import
+or in render.
+
+### Props
+
+| Prop | Type | Default | |
+|---|---|---|---|
+| `src` | `string` | — | Progressive source (MP4, WebM), over HTTP Range. Attached on the first play. |
+| `fallbackSrc` | `string` | — | Tried once when the element refuses `src`. |
+| `hlsSrc` | `string` | — | A manifest. Driven by hls.js only with `loadHls`; Safari plays it natively. |
+| `loadHls` | `HlsLoader` | — | Pass `loadHls` from `luna-player/hls`. |
+| `hlsLoading` | `{ firstByteTimeoutMs, forwardBufferSeconds }` | hls.js's own | How patient hls.js is. |
+| `poster` | `string` | — | |
+| `title` | `string` | `labels.ariaPlay` | The idle play button's accessible name. |
+| `aspectRatio` | `'16:9' \| '9:16' \| '1:1' \| \`${number}/${number}\`` | `'16:9'` | The frame's shape. Fullscreen fills the screen. |
+| `onError` | `(error: { kind: 'playback' }) => void` | — | Once per source, when playback fails for good: the element erred with no fallback left, or hls.js stayed fatal after its recovery. The frame shows a notice with Retry. |
+| `autoPlay` | `boolean` | `false` | A `play()` the browser refuses is not an error. |
+| `locale` | `string` | `'en'` | For audio-track names. |
+| `labels` | `Partial<PlayerLabels>` | — | Merged over the built-in English (`en`). |
+| `storage` | `PlayerStorage \| null` | `localStoragePlayerStorage('luna-player:')` | Where volume and speed are kept. `null` keeps nothing. |
+| `onVideoElement` | `(element: HTMLVideoElement \| null) => void` | — | The `<video>` itself. |
+| `className` | `string` | — | On a wrapper around the frame. |
+
+A new `src`, `hlsSrc` or `fallbackSrc` starts the player afresh: the
+fallback hop, the error and `onError` all start over with the new source.
+
+The `ref` is a `PlayerHandle`: `play()`, `pause()`, `seekTo(seconds)`,
+`getTime()` and `startFullscreen()`.
+
+### Why `loadHls` is a prop
+
+Turbopack, webpack and Vite resolve a string-literal `import('hls.js')` at
+**build** time. If the player held one, a host without the optional peer
+would fail its build. So the player takes a loader, and `luna-player/hls` is
+the one module that names hls.js:
+
+```tsx
+import { Player } from 'luna-player/player';
+import { loadHls } from 'luna-player/hls';
+
+<Player src="/films/a.mp4" hlsSrc="/films/a.m3u8" loadHls={loadHls} />;
+```
+
+Without `loadHls`, `hlsSrc` plays only where the browser plays HLS itself,
+and `src` everywhere else.
+
+### Storage
+
+`storage` takes a `PlayerStorage` (`get`, `set`, `remove`). The default,
+`localStoragePlayerStorage(prefix)`, keeps keys such as
+`luna-player:volume` and `luna-player:speed`. It touches `localStorage` only
+when it is called, inside a `try`, so a browser that refuses site storage
+still plays. The elapsed/remaining clock choice keeps its own `luna:clock`
+key, as `luna-player/clock-mode` does today.
+
+### Keyboard
+
+The keys work while focus is inside the player (or in fullscreen), as in
+Luna Watch: `Space`/`K`/`Enter` play or pause, `←`/`→` seek 10 s (hold to
+go faster), `Shift`+`←`/`→` 60 s, `J`/`L` 10 s, `↑`/`↓` volume while the
+controls are hidden, `M` mute, `F` fullscreen, `<`/`>` speed, `0`–`9` jump
+to a tenth, `,`/`.` step a frame while paused, `Esc` hides the controls and
+leaves fullscreen. TV remote media keys are handled too. The full table is
+`luna-player/player-keys`.
+
+### Bundle
+
+`luna-player/player` is 65.6 kB minified with every peer external (Bun
+1.4.0, measured by `src/player/bundle.test.ts`, which fails above
+72.1 kB and if any hls.js code reaches the bundle).
+
+### Not in this slice
+
+The audio-track and dub menu, subtitles and their menus, quality and the
+settings gear, picture fit, sound modes, the sleep timer, picture-in-picture,
+stream warmup; episodes (now playing, previous/next, skip intro/outro, the
+end screen, "still watching?"), the resume banner; Luna's learning mode,
+cast and play-on-TV, the phone remote, the pause strip, the brand intro,
+progress sync and server seek; the TV layout and the `?` key sheet; slots,
+`usePlayer()`, `onStateChange` and the rest of the handle; built-in `ru` and
+`uk` labels.
 
 ## Browser targets
 
