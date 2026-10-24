@@ -75,6 +75,33 @@ for (const file of [
   'use-player-frame.ts',
   'use-bar-clearance.ts',
   'use-bar-clearance.test.tsx',
+  // FEAT-20260925-718 L3 — the components under the first `<Player>`.
+  'video-element.tsx',
+  'video-element.test.tsx',
+  'use-subtitle-appearance.ts',
+  'launch-veil.tsx',
+  'launch-veil.test.tsx',
+  'player-frame.tsx',
+  'player-frame.test.tsx',
+  'seek-bar.tsx',
+  'seek-bar.test.tsx',
+  'volume-control.tsx',
+  'volume-control.test.tsx',
+  'speed-button.tsx',
+  'playhead-clock.tsx',
+  'bar-tooltip.tsx',
+  'bar-tooltip.test.tsx',
+  'centre-transport.tsx',
+  'centre-transport.test.tsx',
+  'play-pause-confirm.tsx',
+  'playback-error-notice.tsx',
+  'playback-error-notice.test.tsx',
+  'player.css',
+  'player-motion.css',
+  'player-cues.css',
+  // Reduced copies: their diffs are the removed blocks the PR explains.
+  'control-bar.tsx',
+  'control-bar.test.tsx',
 ]) {
   LIFTED[`${CORE}/${file}`] = `player/${file}`;
 }
