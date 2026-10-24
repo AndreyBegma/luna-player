@@ -127,7 +127,9 @@ const sources = walk(SRC).filter(
     !/\.(spec|test)\.tsx?$/.test(path) &&
     !path.endsWith('.d.ts') &&
     path !== join(SRC, 'test-setup.ts') &&
-    path !== join(SRC, 'test-dom-shim.ts'),
+    path !== join(SRC, 'test-dom-shim.ts') &&
+    path !== join(SRC, 'test-stub-global.ts') &&
+    path !== join(SRC, 'player', 'dropping-video.ts'),
 );
 let clientModules = 0;
 for (const source of sources) {

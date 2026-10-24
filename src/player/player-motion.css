@@ -1,0 +1,161 @@
+/* FEAT-20260916-600 — the two pieces of player motion that are Luna's own,
+ * not glass-ui's: the control bar's entrance/exit, and the centre
+ * play/pause confirmation. Kept beside the components that use them, the
+ * way `cards.css` sits beside the cards.
+ */
+
+/* The control bar rises in with the picture, rather than merely fading.
+ *
+ * `showControls` toggles `data-visible` on the bar's own root
+ * (`control-bar.tsx`); this is not a mount/unmount, since the bar stays
+ * mounted for the whole of `mediaReady`. CSS transitions run using the
+ * `transition` declaration of the state being entered — the destination,
+ * not the origin — so the two states below carry different declarations on
+ * purpose: entering combines opacity and transform over `--dur-base`
+ * `--ease-sheet`, leaving animates opacity alone over `--dur-fast` and lets
+ * the transform snap back with no transition of its own, which is what
+ * "exits opacity-only" means.
+ *
+ * No `.motion-reduce-keep` under `prefers-reduced-motion: reduce`: that
+ * class forces every transitioning property on the element to `--dur-fast`
+ * uniformly, which would un-suppress the translateY at a fast-but-nonzero
+ * speed. Left alone, `base.css`'s blanket `transition-duration: 0.01ms
+ * !important` already crushes both directions to imperceptible — the bar
+ * still shows and hides, just without a visible slide, which is the same
+ * "falls back to its opacity fade" the exit direction always was.
+ *
+ * The visible state rests at `transform: none`, not `translateY(0)` — they
+ * draw the same and interpolate the same from `translateY(8px)`, but only
+ * `none` stops being a containing block for the bar's own `position: fixed`
+ * descendants (the settings menu) once the entrance is over.
+ */
+.control-bar-shell {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--dur-fast) linear;
+}
+
+.control-bar-shell[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition:
+    opacity var(--dur-base) var(--ease-sheet),
+    transform var(--dur-base) var(--ease-sheet);
+}
+
+/* The centre play/pause confirmation — a keyboard, remote or picture click,
+ * never the touch centre transport, which already draws its own press
+ * feedback. `lunaPulseOut` (glass-ui) is the one keyframe with a `to`,
+ * because the element unmounts with it rather than resting on a final
+ * frame — see `use-play-pause-confirm.ts`.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .play-pause-confirm {
+    animation: lunaPulseOut var(--dur-sheet) var(--ease-sheet);
+  }
+}
+
+/* FEAT-20260919-619 — the on-screen feedback pill (`picture-feedback.tsx`):
+ * `+30 s` for a held arrow, `−20 s` for a tap run, `2×` for a long-press.
+ * It stays mounted and fades with `--dur-base`, so the number the viewer
+ * is reading does not blink out the moment the gesture ends. Opacity only:
+ * nothing here moves, so there is nothing for reduced motion to remove.
+ */
+.picture-feedback {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-sheet);
+}
+
+.picture-feedback[data-visible="true"] {
+  opacity: 1;
+  transition: opacity var(--dur-fast) linear;
+}
+
+/* FEAT-20260924-680 (increment 2) — the cinematic launch (`launch-veil.tsx`).
+ *
+ * The veil is the title's backdrop, full-bleed over the picture; the black
+ * it fades to is the frame's own, since the picture is dark under it.
+ * `hold` shows it still — a first play not yet known to be a launch, and on
+ * a 16:9 frame the same picture as the poster underneath. `run` is the
+ * launch: the backdrop eases to `scale(1.06)` while it fades to black over
+ * `--dur-scene`. `release` is a start that turned out not to be one, and
+ * fades the whole layer away. Every path ends in `animationend`, which is
+ * what unmounts the layer — so nothing here rests with a transform, and the
+ * only `to` frames are one-shots that end invisible.
+ *
+ * `animation` rather than a transition from an initial state, and no
+ * `@starting-style`: the layer is new when it starts and the Samsung's
+ * Chromium 94 has neither `@starting-style` nor a reliable first-frame
+ * transition. Television: kept as it is — one layer, opacity and transform.
+ */
+.launch-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.launch-veil-image {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+}
+
+@keyframes launchVeilOut {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes launchVeilFade {
+  to {
+    opacity: 0;
+  }
+}
+
+.launch-veil[data-veil="release"] {
+  animation: launchVeilFade var(--dur-fast) linear forwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .launch-veil[data-veil="run"] .launch-veil-image {
+    animation: launchVeilOut var(--dur-scene) var(--ease-sheet) forwards;
+  }
+}
+
+/* The picture under the veil: dark while the veil runs and black holds, then
+ * up from black on its first `playing` — the clip's, then the film's. It
+ * goes dark with no transition (it is behind the veil, or the clip has just
+ * ended on black) and comes up over `--dur-scene`. Opacity only. */
+video[data-launch] {
+  transition: opacity var(--dur-scene) var(--ease-sheet);
+}
+
+video[data-launch="dark"] {
+  opacity: 0;
+  transition: none;
+}
+
+/* Reduced motion: no scale. The veil cross-fades backdrop → black, and the
+ * picture comes up from black, both over `--dur-fast` — a fade that
+ * acknowledges the change of scene rather than motion. The picture's fade is
+ * a transition, so it takes `.motion-reduce-keep` (`video-element.tsx`); that
+ * class only reaches transitions, so the veil's animation is kept here, and
+ * it has to be `!important` to outrank `base.css`'s blanket `*` rule, which
+ * is. */
+@media (prefers-reduced-motion: reduce) {
+  .launch-veil[data-veil="run"] .launch-veil-image {
+    animation: launchVeilFade var(--dur-fast) linear forwards;
+    /* biome-ignore lint/complexity/noImportantStyles: outranks base.css's reduced-motion `*` rule, itself !important */
+    animation-duration: var(--dur-fast) !important;
+  }
+
+  .launch-veil[data-veil="release"] {
+    /* biome-ignore lint/complexity/noImportantStyles: outranks base.css's reduced-motion `*` rule, itself !important */
+    animation-duration: var(--dur-fast) !important;
+  }
+}

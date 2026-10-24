@@ -54,3 +54,23 @@ describe('stepSpeed', () => {
     expect(stepSpeed(3, -1)).toBe(0.75);
   });
 });
+
+describe('a player’s own rungs (FEAT-20260925-718 S4)', () => {
+  const rates = [0.6, 1, 1.5];
+
+  it('cycles through them and wraps', () => {
+    expect(nextSpeed(1, rates)).toBe(1.5);
+    expect(nextSpeed(1.5, rates)).toBe(0.6);
+  });
+
+  it('trusts a stored rate only when it is one of them', () => {
+    expect(savedRate('0.6', rates)).toBe(0.6);
+    expect(savedRate('1.25', rates)).toBeNull();
+  });
+
+  it('steps within them and stops at their ends', () => {
+    expect(stepSpeed(1, -1, rates)).toBe(0.6);
+    expect(stepSpeed(1.5, 1, rates)).toBe(1.5);
+    expect(stepSpeed(2, 1, rates)).toBe(1.5);
+  });
+});
