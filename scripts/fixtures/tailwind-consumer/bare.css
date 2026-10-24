@@ -1,0 +1,6 @@
+/*
+ * FEAT-20260925-718 L3 — `app.css` without the player's stylesheet: the
+ * control `smoke.mjs` compares against, so a class Tailwind would have
+ * generated on its own does not pass for the player's.
+ */
+@import "tailwindcss" source(none);

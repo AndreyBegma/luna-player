@@ -1,0 +1,13 @@
+/*
+ * FEAT-20260925-718 L3 — a host's Tailwind 4 entry stylesheet, the way the
+ * README says to write one: Tailwind, then the player's stylesheet imported
+ * from it. `smoke.mjs` compiles this against the unpacked tarball and checks
+ * that the player's `@source "."` brought its compiled components' classes
+ * into the host's CSS.
+ *
+ * `source(none)` turns the host's own automatic detection off, so the
+ * player's `@source` is the only way a class can get in: a pass is the
+ * player's doing and nothing else's.
+ */
+@import "tailwindcss" source(none);
+@import "luna-player/player.css";
