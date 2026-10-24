@@ -17,6 +17,13 @@
  *    types-only module such as `platform-types`, or the root barrel, which is
  *    empty on purpose — only has to import; every other one has to export
  *    something.
+ * 5. A Tailwind 4 host (`fixtures/tailwind-consumer/`) imports
+ *    `luna-player/player.css` from its entry stylesheet and is compiled
+ *    against the unpacked tarball, the way `@tailwindcss/cli` compiles one:
+ *    the player's `@source "."` has to bring a class used only in the built
+ *    `dist/player/control-bar.js` into the host's CSS, and the same host
+ *    without the import must not have it. The host turns its own detection
+ *    off (`source(none)`), so the player's `@source` is the only way in.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
@@ -31,6 +38,8 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
+import { compile } from '@tailwindcss/node';
+import { Scanner } from '@tailwindcss/oxide';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -127,7 +136,10 @@ const sources = walk(SRC).filter(
     !/\.(spec|test)\.tsx?$/.test(path) &&
     !path.endsWith('.d.ts') &&
     path !== join(SRC, 'test-setup.ts') &&
-    path !== join(SRC, 'test-dom-shim.ts'),
+    path !== join(SRC, 'test-dom-shim.ts') &&
+    path !== join(SRC, 'test-stub-global.ts') &&
+    path !== join(SRC, 'player', 'dropping-video.ts') &&
+    path !== join(SRC, 'player', 'labels', 'test-labels.ts'),
 );
 let clientModules = 0;
 for (const source of sources) {
@@ -162,11 +174,60 @@ process.stdout.write(imported.stdout);
 process.stderr.write(imported.stderr);
 if (imported.status !== 0) fail('importing the JS entries failed (above)');
 
+// 5. The player's classes reach a Tailwind host through `@source`.
+/** What `@tailwindcss/cli` does with one entry stylesheet, minus the file. */
+async function tailwind(entry) {
+  const css = readFileSync(entry, 'utf8');
+  const compiler = await compile(css, { base: SMOKE, onDependency: () => {} });
+  const sources = [
+    ...(compiler.root === 'none'
+      ? []
+      : compiler.root === null
+        ? [{ base: SMOKE, pattern: '**/*', negated: false }]
+        : [{ ...compiler.root, negated: false }]),
+    ...compiler.sources,
+  ];
+  return { css: compiler.build(new Scanner({ sources }).scan()), sources };
+}
+
+/** A class only `control-bar.tsx` uses: the bar's safe-area inset. */
+const PLAYER_ONLY = 'safe-area-inset-left';
+const builtBar = readFileSync(join(PKG, 'dist', 'player', 'control-bar.js'), 'utf8');
+if (!builtBar.includes(PLAYER_ONLY)) {
+  fail(`dist/player/control-bar.js no longer uses ${PLAYER_ONLY}; pick another marker`);
+}
+const FIXTURE = join(ROOT, 'scripts', 'fixtures', 'tailwind-consumer');
+for (const name of ['app.css', 'bare.css']) {
+  copyFileSync(join(FIXTURE, name), join(SMOKE, name));
+}
+let tailwindChecked = false;
+try {
+  const { css: host, sources } = await tailwind(join(SMOKE, 'app.css'));
+  const { css: bare } = await tailwind(join(SMOKE, 'bare.css'));
+  const playerDist = join(PKG, 'dist', 'player');
+  if (!sources.some((source) => source.base === playerDist)) {
+    fail(
+      `the host's Tailwind sources are ${JSON.stringify(sources)}; none is the tarball's dist/player/`,
+    );
+  }
+  if (!host.includes(PLAYER_ONLY)) {
+    fail(
+      `a Tailwind host importing luna-player/player.css did not get the player's classes (${PLAYER_ONLY}): @source does not reach dist/player/`,
+    );
+  }
+  if (bare.includes(PLAYER_ONLY)) {
+    fail(`a Tailwind host without luna-player/player.css has ${PLAYER_ONLY} anyway; the check proves nothing`);
+  }
+  tailwindChecked = true;
+} catch (error) {
+  fail(`compiling the Tailwind consumer fixture failed: ${error?.message ?? error}`);
+}
+
 if (failures.length > 0) {
   console.error(`\nsmoke test failed (${failures.length}):`);
   for (const message of failures) console.error(`  - ${message}`);
   process.exit(1);
 }
 console.log(
-  `smoke test passed: ${filename}, ${Object.keys(manifest.exports).length} exports, ${jsSubpaths.length + typeOnlySubpaths.length} JS entries imported (${typeOnlySubpaths.length} types-only), ${clientModules} 'use client' modules checked`,
+  `smoke test passed: ${filename}, ${Object.keys(manifest.exports).length} exports, ${jsSubpaths.length + typeOnlySubpaths.length} JS entries imported (${typeOnlySubpaths.length} types-only), ${clientModules} 'use client' modules checked, ${tailwindChecked ? 'player classes reach a Tailwind host' : 'Tailwind host not checked'}`,
 );
